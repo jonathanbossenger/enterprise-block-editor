@@ -8,18 +8,19 @@ Modern enterprise applications frequently need to connect with external services
 
 When integrating external APIs into blocks, developers must decide whether they need the data in the Editor, or when the block is rendered. The specific use case will require different approaches.
 
-### Displaying data in the Block Editor
+### Client-Side vs. Server-Side API Requests
 
-When displaying data in the Block Editor, you can use JavaScript to fetch and render the data dynamically. This approach is useful for blocks that require real-time data updates or user interactions.
+When integrating external APIs into Gutenberg blocks, developers must decide whether to fetch data on the client side (JavaScript) or the server side (PHP). Each approach offers distinct advantages and challenges.
 
-Using the WordPress `api-fetch` [package](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-api-fetch/), it's possible to pass an external API URL and handle the response directly in the block's `edit` component:
+#### Client-Side Approach
+
+The client-side approach leverages JavaScript within the Block Editor environment to fetch and render external data, using the `api-fetch` [package](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-api-fetch/). For example, this is a custom Posts component, that fetchs a list of posts from an external API and returns the results: 
 
 ```javascript
-import { useBlockProps} from '@wordpress/block-editor';
 import { useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
-export default function Edit() {
+export default function Posts() {
     const [data, setData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -33,8 +34,7 @@ export default function Edit() {
                 setData(response);
                 setIsLoading(false);
             } catch (error) {
-                console.error('Error fetching data:', error);
-                setError(error);
+                  setError(error);
                 setIsLoading(false);
             }
         };
@@ -44,153 +44,120 @@ export default function Edit() {
 
     if (isLoading) {
         return (
-            <div {...useBlockProps()}>
-                <p>Loading data...</p>
-            </div>
+            <p>Loading data...</p>
         );
     }
 
     if (error) {
         return (
-            <div {...useBlockProps()}>
-                <p>Error loading data. Please try again.</p>
-            </div>
+            <p>Error loading data. Please try again.</p>
         );
     }
 
     return (
-        <div {...useBlockProps()}>
-            {
-                data.map((post) => (
-                    <div key={post.id}>
-                        <h3>{post.title.rendered}</h3>
-                        <div dangerouslySetInnerHTML={ { __html: post.excerpt.rendered } }></div>
-                    </div>
-                ))
-            }
-        </div>
+        data.map((item) => (
+            <div key={item.id}>
+                <h3>{item.title.rendered}</h3>
+                <div dangerouslySetInnerHTML={ { __html: item.excerpt.rendered } }></div>
+            </div>
+        ))
     );
 }
 ```
 
-Fetching data for a block's `edit` component includes some challenges to be aware of:
+This approach is generally used in a block's `edit` component, to render external data in the Editor. 
+
+```javascript
+import { useBlockProps} from '@wordpress/block-editor';
+import Posts from './components/Posts';
+
+export default function Edit() {
+    return (
+        <div {...useBlockProps()}>
+            <Posts />
+        </div>
+    );
+}
+
+```
+
+This approach is particularly effective for:
+
+- Real-time data display
+- Blocks that need to respond to user actions
+- When you want to show a preview of external data in the Editor
+
+However, client-side fetching introduces some challenges to be aware of:
 
 - You risk exposing credentials in client-side code, especially if you need to access private APIs
 - You might have to deal with managing API rate limits when multiple editors are actively using the block
 - Depending on the amount of data being fetched, there may be a performance impact on the editing experience
 
-### Displaying data on the front end
+#### Server-Side Approach
 
-When displaying data on the front end, you can use server-side rendering to fetch and display the data in a Dynamic block, using WordPress HTTP API functions. This approach is useful for blocks that require data to be displayed in a specific format or layout.
-
-Below is an example of a `render.php` file from a dynamic block that fetches data from an external API and displays it on the front end:
+An alternative is a server-side approach, which employs the WordPress HTTP API's PHP functions to fetch data, and render it where needed:
 
 ```php
-// Fetch data from external API
-$api_url = 'https://api.example.com/data';
-$response = wp_remote_get( $api_url );
+function get_external_api_data() {
+    $api_url = 'https://example.com/posts';
+    $response = wp_remote_get( $api_url );
+    
+    echo '<h2>API Data</h2>';
+    
+    if ( is_wp_error( $response ) ) {
+        return '<p>Error fetching API data. Please try again later mate.</p>';
+    }
+    
+    $body = wp_remote_retrieve_body( $response );
+    $data = json_decode( $body, true );
+    
+    if ( empty( $data ) ) {
+        return '<p>No data available.</p>';
+    }
+    
+    error_log( print_r( $data, true ) );
 
-if ( is_wp_error( $response ) ) {
-	echo '<p>Error fetching API data. Please try again later.</p>';
+    foreach ( $data as $post ) {
+        $output .= '<h3>' . esc_html( $post['title']['rendered'] ) . '</h3>';
+        $output .= '<div>' . esc_html( $post['excerpt']['rendered'] ) . '</div>';
+    }
+    
+    
+    return $output;   
 }
+```
 
-$body = wp_remote_retrieve_body( $response );
-$data = json_decode( $body, true );
+A common usage would be in a dynamic block's `render.php` file. 
 
-if ( empty( $data ) ) {
-	echo '<p>No data available.</p>';
-}
-
-// Build the block HTML
-$output = '<div '. get_block_wrapper_attributes() . '>';
-$output .= '<h3>Title</h3>';
-$output .= '<p>Content</p>';
-$output .= '</div>';
-
-echo $output;
+```php
+$data = get_external_api_data();
+?>
+<div <?php echo get_block_wrapper_attributes()?>>;
+    <?php echo $data ?>
+</div>
 ```
 
 The server-side approach offers:
 
-- More secure handling of API credentials
-- Better caching capabilities
+- More secure handling of API credentials, as they are not exposed in client-side code
+- Better caching capabilities like using WordPress transients or object caching
 - Reduced JavaScript payload in the editor
-- Ability to process and transform data before rendering
+- The ability to process and transform the data before rendering
 
 The trade-off is that the Block Editor doesn't display actual API data until the page is rendered, limiting the visual editing experience.
 
-### Rendering External API Data in Both Environments
+### Hybrid Approach
 
-For an optimal enterprise solution, you'll often want to show API data both in the editor (back-end) and on the published page (front-end). This requires a hybrid approach:
-
-```javascript
-// Block registration
-registerBlockType('my-plugin/api-data-block', {
-    title: 'External API Data',
-    icon: 'database',
-    category: 'widgets',
-    attributes: {
-        endpoint: {
-            type: 'string',
-            default: 'default-endpoint'
-        },
-        cachedData: {
-            type: 'object',
-            default: {}
-        }
-    },
-    edit: Edit,
-    save: () => null // Using server-side rendering
-});
-
-// Edit component with data fetching
-function Edit({ attributes, setAttributes }) {
-    const { endpoint, cachedData } = attributes;
-    const [data, setData] = useState(cachedData);
-    const [isLoading, setIsLoading] = useState(Object.keys(cachedData).length === 0);
-
-    useEffect(() => {
-        if (isLoading) {
-            wp.apiFetch({
-                path: `/my-plugin/v1/proxy-api?endpoint=${endpoint}`
-            }).then(response => {
-                setData(response);
-                // Cache the data in block attributes
-                setAttributes({ cachedData: response });
-                setIsLoading(false);
-            }).catch(error => {
-                console.error('Error fetching API data:', error);
-                setIsLoading(false);
-            });
-        }
-    }, [endpoint, isLoading]);
-
-    // Editor representation
-    return (
-        <div className="api-data-block editor-view">
-            {isLoading ? (
-                <p>Loading API data...</p>
-            ) : (
-                <>
-                    <h3>{data.title}</h3>
-                    <p>{data.description}</p>
-                </>
-            )}
-        </div>
-    );
-}
-```
-
-This approach creates a custom REST API endpoint in WordPress to proxy requests to the external API, improving security by keeping credentials server-side while enabling data preview in the editor[^7].
+In some cases, a hybrid approach might be useful, by creating a custom REST API endpoint in WordPress to proxy requests to the external API, improving security by keeping credentials server-side while enabling data full access to the data in the editor.
 
 ```php
 // Register custom REST API endpoint to proxy external API requests
-add_action('rest_api_init', function () {
-    register_rest_route('my-plugin/v1', '/proxy-api', array(
+add_action( 'rest_api_init', function () {
+    register_rest_route( 'vip-plugin/v1', '/api-posts', array(
         'methods' => 'GET',
-        'callback' => 'my_plugin_proxy_api_request',
+        'callback' => 'vip_plugin_proxy_api_request',
         'permission_callback' => function() {
-            return current_user_can('edit_posts');
+            return current_user_can( 'edit_posts' );
         }
     ));
 });
@@ -201,110 +168,96 @@ add_action('rest_api_init', function () {
  * @param WP_REST_Request $request Full details about the request.
  * @return WP_REST_Response|WP_Error Response object or error.
  */
-function my_plugin_proxy_api_request($request) {
-    $endpoint = $request->get_param('endpoint');
-    $api_url = 'https://api.example.com/' . $endpoint;
+function vip_plugin_proxy_api_request( $request ) {
+    $api_url = 'https://example.com/posts';
     
-    $response = wp_remote_get($api_url, array(
-        'headers' => array(
-            'Authorization' => 'Bearer ' . get_option('api_secret_key'),
-        ),
-    ));
+    $response = wp_remote_get( $api_url );
     
-    if (is_wp_error($response)) {
+    if ( is_wp_error( $response ) ) {
         return new WP_Error('api_error', 'Failed to fetch external data');
     }
     
-    $body = wp_remote_retrieve_body($response);
-    return json_decode($body, true);
+    $body = wp_remote_retrieve_body( $response );
+    return json_decode( $body, true );
 }
 ```
 
+With this in place, you could update the `Posts` component to fetch data from your custom endpoint, by passing an internal WP REST API path to the `apiFetch` function:
+
+```javascript
+    useEffect(() => {
+    const fetchData = async () => {
+        try {
+            const response = await apiFetch({
+                path: 'vip-plugin/v1/api-posts',
+            });
+            setData(response);
+            setIsLoading(false);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            setError(error);
+            setIsLoading(false);
+        }
+    };
+
+    fetchData();
+}, []);
+```
+
+You could now use this new `Posts` component in your block's `edit` component and in the `save` function, for a complete client side block solution but using server side fetching for the data.
 
 ### Error Handling and Loading States
 
 For enterprise applications, robust error handling is critical. Your blocks should gracefully handle API outages, rate limiting, and authentication failures.
 
+#### Javascript
+
+In the previous examples, you will notice the use of `isLoading` and `error` states. This is a common pattern in React applications, where you can show a loading spinner or an error message based on the state of the API request.
+
 ```javascript
-// Enhanced error handling in Edit component
-function Edit({ attributes, setAttributes }) {
     const [data, setData] = useState(null);
-    const [status, setStatus] = useState({
-        loading: true,
-        error: null,
-        lastUpdated: null
-    });
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await apiFetch({
+                    url: 'https://example.com/posts',
+                });
+                setData(response);
+                setIsLoading(false);
+            } catch (error) {
+                  setError(error);
+                setIsLoading(false);
+            }
+        };
+
         fetchData();
     }, []);
 
-    const fetchData = async () => {
-        setStatus({ ...status, loading: true });
-        try {
-            const response = await wp.apiFetch({
-                path: '/my-plugin/v1/external-data'
-            });
-
-            setData(response);
-            setStatus({
-                loading: false,
-                error: null,
-                lastUpdated: new Date()
-            });
-        } catch (error) {
-            console.error('API Error:', error);
-            setStatus({
-                loading: false,
-                error: {
-                    code: error.code || 'unknown',
-                    message: error.message || 'Unknown error occurred'
-                },
-                lastUpdated: status.lastUpdated
-            });
-        }
-    };
-
-    // Display different UI based on status
-    if (status.loading) {
+    if (isLoading) {
         return (
-            <div className="api-block-loading">
-                <Spinner />
-                <p>Fetching latest data...</p>
-            </div>
+            <p>Loading data...</p>
         );
     }
 
-    if (status.error) {
+    if (error) {
         return (
-            <div className="api-block-error">
-                <h3>Error: {status.error.code}</h3>
-                <p>{status.error.message}</p>
-                <button onClick={fetchData}>Retry</button>
-                {status.lastUpdated && (
-                    <p className="data-timestamp">
-                        Showing data from: {status.lastUpdated.toLocaleString()}
-                    </p>
-                )}
-            </div>
+            <p>Error loading data. Please try again.</p>
         );
     }
-
-    return (
-        <div className="api-data-block">
-            <div className="block-controls">
-                <button onClick={fetchData}>Refresh Data</button>
-                <span>Last updated: {status.lastUpdated.toLocaleString()}</span>
-            </div>
-            <div className="block-content">
-                {/* Render your data here */}
-            </div>
-        </div>
-    );
-}
-
 ```
 
+#### PHP
+
+When using the server-side approach, you can handle errors by checking the response from the API and returning appropriate error messages. See the use of `is_wp_error()` in the previous example.
+
+```php
+    if ( is_wp_error( $response ) ) {
+        return new WP_Error('api_error', 'Failed to fetch external data');
+    }
+```
 
 ### Performance Optimization Strategies
 
@@ -312,37 +265,40 @@ In enterprise environments, performance is paramount. Consider these strategies 
 
 1. **Implement caching**: Cache API responses using transients or a dedicated caching plugin to reduce API calls:
 ```php
-function get_external_api_data($endpoint) {
-    $cache_key = 'api_data_' . md5($endpoint);
-    $cached_data = get_transient($cache_key);
-    
+
+function vip_plugin_proxy_api_request( $request ) {
+
+    $cache_key = 'api_data_external_posts' );
+    $cached_data = get_transient( $cache_key );
+
     if (false !== $cached_data) {
         return $cached_data;
     }
+
+    $api_url = 'https://example.com/posts';
     
-    // Make API request
-    $response = wp_remote_get('https://api.example.com/' . $endpoint);
+    $response = wp_remote_get( $api_url );
     
-    if (is_wp_error($response)) {
-        return null;
+    if ( is_wp_error( $response ) ) {
+        return new WP_Error('api_error', 'Failed to fetch external data');
     }
     
-    $data = json_decode(wp_remote_retrieve_body($response), true);
+    $body = wp_remote_retrieve_body( $response );
     
-    // Cache for 1 hour
-    set_transient($cache_key, $data, HOUR_IN_SECONDS);
-    
+    $data = json_decode( $body, true );
+
+    set_transient( $cache_key, $data, HOUR_IN_SECONDS );
+     
     return $data;
 }
-
 ```
 
 2. **Implement caching reset on content updates**:
 ```php
-add_action('save_post', function($post_id) {
+add_action( 'save_post', function( $post_id ) {
     // Clear relevant API caches when content is updated
-    if (!wp_is_post_revision($post_id)) {
-        delete_transient('api_data_specific_cache');
+    if ( ! wp_is_post_revision( $post_id ) ) {
+        delete_transient( 'api_data_external_posts' );
     }
 });
 
