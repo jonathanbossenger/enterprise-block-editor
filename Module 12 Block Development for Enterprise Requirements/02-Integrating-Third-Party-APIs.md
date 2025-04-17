@@ -1,25 +1,25 @@
 # Integrating Third-Party APIs
 
-In enterprise WordPress development, the ability to integrate third-party APIs in custom Gutenberg blocks is a powerful way to extend block functionality, improve user experiences, and connect your WordPress applications with external services and data sources. This lesson explores the technical aspects of consuming external APIs within the Block Editor framework, addressing both the front-end and back-end rendering challenges, as well as implementing robust authentication strategies essential for enterprise applications.
+In enterprise WordPress development, the ability to integrate third-party APIs in custom Gutenberg blocks is a useful way to extend block functionality, improve user experiences, and connect your WordPress applications with external services and data sources. This lesson explores the technical aspects of consuming external APIs for the Block Editor, addressing both the front-end and back-end rendering implementations, as well as discussing authentication strategies.
 
 ## Fetching and Displaying External Data in Blocks
 
-Modern enterprise applications frequently need to connect with external services—from CRM systems and marketing automation platforms to data visualization services and internal microservices. The WordPress Block Editor provides a sophisticated framework for implementing these integrations in a way that maintains the visual editing experience while ensuring optimal performance.
+Modern enterprise applications frequently need to connect with external services—from CRM systems and marketing automation platforms to data visualization services and internal microservices. WordPress blocks can be designed to fetch and display this data, providing a seamless user experience.
 
-### Client-Side vs. Server-Side API Requests
+When integrating external APIs into blocks, developers must decide whether they need the data in the Editor, or when the block is rendered. The specific use case will require different approaches.
 
-When integrating external APIs into Gutenberg blocks, developers must decide whether to fetch data on the client side (JavaScript) or the server side (PHP). Each approach offers distinct advantages and challenges.
+### Displaying data in the Block Editor
 
-#### Client-Side Approach
+When displaying data in the Block Editor, you can use JavaScript to fetch and render the data dynamically. This approach is useful for blocks that require real-time data updates or user interactions.
 
-The client-side approach leverages JavaScript within the Block Editor environment to fetch and render external data, using the `api-fetch` package:
+Using the WordPress `api-fetch` [package](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-api-fetch/), it's possible to pass an external API URL and handle the response directly in the block's `edit` component:
 
 ```javascript
+import { useBlockProps} from '@wordpress/block-editor';
 import { useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
-export default function Edit( attributes ) {
-    const apiSecretKey = attributes.apiSecretKey;
+export default function Edit() {
     const [data, setData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -27,13 +27,8 @@ export default function Edit( attributes ) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Using WordPress's apiFetch for consistent handling
-                // passing an Authorization header
                 const response = await apiFetch({
-                    path: '/custom-namespace/v1/external-data',
-                    headers : {
-                        Authorization: 'Bearer ' + apiSecretKey
-                    }
+                    url: 'https://example.com/posts',
                 });
                 setData(response);
                 setIsLoading(false);
@@ -48,89 +43,71 @@ export default function Edit( attributes ) {
     }, []);
 
     if (isLoading) {
-        return <p>Loading data...</p>;
+        return (
+            <div {...useBlockProps()}>
+                <p>Loading data...</p>
+            </div>
+        );
     }
 
     if (error) {
-        return <p>Error loading data. Please try again.</p>;
+        return (
+            <div {...useBlockProps()}>
+                <p>Error loading data. Please try again.</p>
+            </div>
+        );
     }
 
     return (
-        <div className="api-data-block">
-            <h3>{data.title}</h3>
-            <p>{data.description}</p>
+        <div {...useBlockProps()}>
+            {
+                data.map((post) => (
+                    <div key={post.id}>
+                        <h3>{post.title.rendered}</h3>
+                        <div dangerouslySetInnerHTML={ { __html: post.excerpt.rendered } }></div>
+                    </div>
+                ))
+            }
         </div>
     );
 }
 ```
 
-This approach is particularly effective for:
+Fetching data for a block's `edit` component includes some challenges to be aware of:
 
-- Real-time data display
-- Interactive blocks that need to respond to user actions
-- When you want to show a preview of external data in the editor
+- You risk exposing credentials in client-side code, especially if you need to access private APIs
+- You might have to deal with managing API rate limits when multiple editors are actively using the block
+- Depending on the amount of data being fetched, there may be a performance impact on the editing experience
 
-However, client-side fetching introduces challenges:
+### Displaying data on the front end
 
-- Exposing credentials in client-side code
-- Cross-Origin Resource Sharing (CORS) restrictions
-- Managing API rate limits when multiple editors are active
-- Performance impact on the editing experience
+When displaying data on the front end, you can use server-side rendering to fetch and display the data in a Dynamic block, using WordPress HTTP API functions. This approach is useful for blocks that require data to be displayed in a specific format or layout.
 
-#### Server-Side Approach
-
-The server-side approach employs PHP to fetch data and then passes it to the block, using the WordPress HTTP API:
+Below is an example of a `render.php` file from a dynamic block that fetches data from an external API and displays it on the front end:
 
 ```php
-<?php
-/**
- * Server-side rendering for the API data block.
- *
- * @param array $attributes The block attributes.
- * @return string The block HTML.
- */
-function my_custom_api_block_render_callback( $attributes ) {
-    // Fetch data from external API
-    $api_url = 'https://api.example.com/data';
-    $response = wp_remote_get( $api_url, array(
-        'headers' => array(
-            'Authorization' => 'Bearer ' . get_option( 'api_secret_key' ),
-        ),
-    ) );
+// Fetch data from external API
+$api_url = 'https://api.example.com/data';
+$response = wp_remote_get( $api_url );
 
-    if ( is_wp_error( $response ) ) {
-        return '<p>Error fetching API data. Please try again later.</p>';
-    }
-
-    $body = wp_remote_retrieve_body( $response );
-    $data = json_decode( $body, true );
-
-    if ( empty( $data ) ) {
-        return '<p>No data available.</p>';
-    }
-
-    // Build the block HTML
-    $output = '<div class="api-data-block">';
-    $output .= '<h3>' . esc_html( $data['title'] ) . '</h3>';
-    $output .= '<p>' . esc_html( $data['description'] ) . '</p>';
-    $output .= '</div>';
-
-    return $output;
+if ( is_wp_error( $response ) ) {
+	echo '<p>Error fetching API data. Please try again later.</p>';
 }
-```
 
-You would register this block with:
+$body = wp_remote_retrieve_body( $response );
+$data = json_decode( $body, true );
 
-```php
-register_block_type( 'my-plugin/api-data', array(
-    'attributes'      => array(
-        'apiEndpoint' => array(
-            'type' => 'string',
-            'default' => 'default-endpoint',
-        ),
-    ),
-    'render_callback' => 'my_custom_api_block_render_callback',
-) );
+if ( empty( $data ) ) {
+	echo '<p>No data available.</p>';
+}
+
+// Build the block HTML
+$output = '<div '. get_block_wrapper_attributes() . '>';
+$output .= '<h3>Title</h3>';
+$output .= '<p>Content</p>';
+$output .= '</div>';
+
+echo $output;
 ```
 
 The server-side approach offers:
