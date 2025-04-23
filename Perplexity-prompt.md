@@ -18,8 +18,8 @@ Do not add horizontal rules.
 
 You are creating lessons for Module 13: Roadmap and Case Studies
 
-Create a new lesson titled Upcoming Features and Roadmap
+Create a new lesson titled Community Contribution
 
 It should cover the following three high-level topics
-* Phase 3: Multi-user Collaboration
-* Staying informed about the Gutenberg project's evolution and upcoming features
+* How to contribute to Gutenberg's open-source development
+* Engaging with the WordPress community
