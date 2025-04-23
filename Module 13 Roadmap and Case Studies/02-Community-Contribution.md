@@ -4,7 +4,9 @@ As a WordPress developer, understanding how to contribute to the Block Editor ec
 
 ## Understanding the Value of Contribution
 
-Before diving into the mechanics of contribution, it's important to understand why contributing to open-source projects like Gutenberg matters. Contributing to WordPress provides multiple benefits that extend beyond altruism. As one contributor noted, "By contributing to WordPress, you can help the whole community, you can make your WordPress profile stronger, get the knowledge of the latest technology they are using in upcoming updates, etc."[9]
+Before diving into the mechanics of contribution, it's important to understand why contributing to open-source projects like WordPress matters. 
+
+Contributing to WordPress provides multiple benefits that extend beyond altruism. 
 
 For enterprise developers specifically, contribution offers:
 
@@ -14,48 +16,42 @@ For enterprise developers specifically, contribution offers:
 4. Enhanced credibility within client relationships
 5. First-hand knowledge of upcoming changes that might affect enterprise implementations
 
-The Gutenberg project represents a significant focus of WordPress development efforts. According to the GitHub repository, "Gutenberg is a codename for a whole new paradigm in WordPress site building and publishing, that aims to revolutionize the entire publishing experience."[10] By contributing to this effort, you position yourself at the forefront of WordPress's evolution.
+By contributing to the project, you position yourself at the forefront of WordPress's evolution.
 
 ## How to Contribute to Gutenberg's Open-Source Development
 
-### The Structure of the Gutenberg Project
-
-Gutenberg development follows a phased approach with specific focus areas:
-
-1. **Editing** (Complete): The core block editor experience shipped in WordPress 5.0
-2. **Customization** (In progress): Including full-site editing, block patterns, block directory, and block-based themes
-3. **Collaboration**: Future phase focused on multi-user editing capabilities
-4. **Multilingual**: Future phase addressing internationalization capabilities[10]
-
-Understanding this roadmap helps you target your contributions effectively, especially as an enterprise developer likely interested in advanced customization and collaboration features.
-
 ### Setting Up Your Development Environment
 
-To contribute code to Gutenberg, you'll need to set up a local development environment. The process involves standard GitHub workflows:
+To contribute code to the Gutenberg project, you'll need to set up the repository in a local development environment. 
 
-1. Fork the Gutenberg repository to your own GitHub account
-2. Clone your fork locally
-3. Set up the development dependencies
-4. Create a branch for your contribution
+The Block Editor handbook includes a [contributor guide for developers](https://developer.wordpress.org/block-editor/contributors/code/), including details of how to [configure your local environment](https://developer.wordpress.org/block-editor/contributors/code/getting-started-with-code-contribution/), but here's a simplified overview:
 
-The Gutenberg repository includes detailed setup instructions, but here's a simplified overview:
+Since the code is hosted on [GitHub](https://github.com/), It's recommended to fork the Gutenberg repository to your own GitHub account so that you can create branches and submit pull requests (PRs) without affecting the main repository. 
+
+Once you've forked the repository, clone it to a WordPress installation on your local machine:
 
 ```bash
-# Clone your fork of the repository
+cd /path/to/local/wordpress/wp-content/plugins
 git clone https://github.com/your-username/gutenberg.git
-
-# Navigate to the repository directory
 cd gutenberg
-
-# Create a branch for your work
-git checkout -b add/your-branch-name
 ```
 
-For the development environment, Gutenberg requires:
+Gutenberg requires that you have [Node.js](https://nodejs.org/en) installed. The recommended version is the latest LTS (Long Term Support) version, and using [Node Version Manager](https://github.com/nvm-sh/nvm) (nvm) is recommended to manage Node versions across all operating systems. 
 
-- Node.js (v18.19.1 or later)
-- npm (v9.2.0 or later)
-- Yarn (v3.3.0 or later via corepack)[4]
+With Node.js installed, you can install the necessary dependencies, and start the development server:
+
+```bash
+npm install
+npm run dev
+```
+
+This command installs all the required packages and starts a local development server, allowing you to view changes in real-time.
+
+If for whatever reason you don't already have a local WordPress installation, you can also use wp-env, which is a tool that sets up a local WordPress environment for you. To use this you'll need to install Docker and then run the following command inside the `gutenberg` directory:
+
+```bash
+npm run wp-env
+```
 
 ### Finding Issues to Work On
 
