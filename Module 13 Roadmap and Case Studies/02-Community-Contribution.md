@@ -55,7 +55,11 @@ npm run wp-env
 
 ### Finding Issues to Work On
 
-The Gutenberg team uses GitHub's issue tracking system to organize work. For new contributors, the project maintains a list of "good first issues" specifically designed to help you get familiar with the codebase and contribution process[14].
+Depending on where you would like to contribute, you can find issues to work on in the Gutenberg repository's [GitHub issue tracking system](https://github.com/WordPress/gutenberg/issues). 
+
+At the top of that page, pinned issues highlight important discussions or tasks that need attention. Currently, an issue tracking for for [Phase 3 of the Gutenberg project is pinned](https://github.com/WordPress/gutenberg/issues/61162), which is focused on collaborative editing and real-time collaboration features.
+
+For new contributors, the project maintains a list of ["good first issues"](https://github.com/WordPress/gutenberg/issues?q=is%3Aissue%20state%3Aopen%20label%3A%22Good%20First%20Issue%22) specifically designed to help you get familiar with the codebase and contribution process[14].
 
 When examining issues, pay attention to GitHub labels which categorize issues by:
 
@@ -78,11 +82,16 @@ These involve fixing bugs or implementing new features. The Gutenberg codebase p
 - PHP for server-side functionality
 - CSS for styling
 
-All code must adhere to the WordPress Coding Standards and pass automated tests before being accepted.
+All code must adhere to the WordPress Coding Standards and pass automated tests before being accepted. These tests are automatically run for every pull request, but you can run them locally using the following commands:
+
+```bash
+npm run test
+npm run lint
+```
 
 #### Documentation Contributions
 
-Documentation is crucial for enterprise adoption. The Gutenberg documentation is maintained as markdown files in the `docs/` directory of the repository[17]. This includes:
+Documentation is crucial for enterprise adoption. The Gutenberg documentation is maintained as markdown files in the `docs/` directory of the repository. This includes:
 
 - API documentation
 - Block creation guides
@@ -114,23 +123,12 @@ Once you've made your changes locally, submit a pull request (PR) to the main Gu
 4. Complete the pull request template with details about your changes
 5. Wait for review from maintainers
 
-```bash
-# Stage files to commit
-git add .
-
-# Add a commit message
-git commit -m "Your Good Commit Message"
-
-# Push to your fork
-git push origin add/your-branch-name
-```
 
 The PR template asks for specific information about your contribution, including:
 
 - A clear description of the problem and solution
 - Steps to test your changes
 - Screenshots or GIFs demonstrating visual changes
-- References to related issues or PRs[14]
 
 ### Code Review and Iteration
 
@@ -161,7 +159,7 @@ The WordPress Slack workspace serves as the central hub for real-time communicat
 - #design: User interface and experience discussions
 - #accessibility: Accessibility considerations and testing
 
-Joining requires a WordPress.org account. Once logged in, you can retrieve your Slack invite link from https://make.wordpress.org/chat/[3].
+Joining requires [a WordPress.org account](https://login.wordpress.org/register). Once logged in, you can retrieve your Slack invite link from https://make.wordpress.org/chat/.
 
 #### Make WordPress Blogs
 
@@ -183,7 +181,7 @@ In-person and virtual events provide opportunities to deepen community connectio
 
 #### WordCamps
 
-These community-organized conferences happen worldwide and often include contributor days specifically for working on WordPress projects. For enterprise developers, these events offer networking opportunities with both core contributors and other enterprise users.
+These [community-organized conferences](https://central.wordcamp.org/) happen worldwide and often include contributor days specifically for working on WordPress projects. For enterprise developers, these events offer networking opportunities with both core contributors and other enterprise users.
 
 #### WordPress Meetups
 
@@ -209,48 +207,6 @@ This team creates and maintains developer and user documentation, including the 
 
 Ensuring Gutenberg works for all users regardless of ability is the focus of this team. They review features for accessibility compliance and advocate for inclusive design.
 
-### Building Your WordPress Profile
-
-As you contribute, you'll build a public profile within the WordPress ecosystem:
-
-#### WordPress.org Profile
-
-Your WordPress.org profile displays your contributions across various areas of the project. A robust profile demonstrates your expertise and commitment to potential clients or employers.
-
-#### Recognition Programs
-
-WordPress recognizes significant contributors through programs like:
-
-- Core Committer status
-- Release team participation
-- Credits in WordPress releases
-
-For enterprise developers, these recognitions validate your expertise to stakeholders and clients.
-
-## Real-World Impact of Contributions
-
-### Case Studies and Success Stories
-
-Contributions to Gutenberg have led to significant improvements for enterprises using WordPress. For example, News UK achieved remarkable efficiency gains after implementing Gutenberg with WordPress VIP:
-
-"WordPress VIP helped long-time customer News UK implement Gutenberg, the WordPress block editor, which accelerated content production by 60%. The implementation resulted in a 60% improvement in time to publish and a 30% reduction in the number of clicks to publish an article."[6]
-
-Another case study from Redwall.ee demonstrates the benefits of migrating to Gutenberg: "After switching to Gutenberg, the administration view looks very similar to the visitor view, which makes administration easy and intuitive. Also, by combining the blocks developed for the page, an infinite number of pages and blocks with different structures can be created, which allows the website to adapt to the changing needs of the company without additional developments."[15]
-
-These examples highlight how your contributions can create tangible business value for enterprises worldwide.
-
-### Long-term Benefits of Contribution
-
-From a career perspective, consistent Gutenberg contribution:
-
-1. Demonstrates advanced technical skills to potential employers
-2. Builds a portfolio of public work that showcases your abilities
-3. Creates opportunities for speaking engagements and thought leadership
-4. Develops relationships that can lead to client referrals or employment offers
-5. Provides early access to technologies that will eventually impact enterprise clients
-
-As noted by many contributors, the knowledge gained through contribution often exceeds what's possible through conventional learning methods alone.
-
 ## Conclusion
 
 Contributing to Gutenberg represents an investment in both the WordPress ecosystem and your professional development as an enterprise developer. By understanding the contribution pathways, engaging with the community, and making meaningful contributions, you position yourself at the intersection of open-source idealism and enterprise pragmatism.
@@ -258,49 +214,3 @@ Contributing to Gutenberg represents an investment in both the WordPress ecosyst
 The Gutenberg project continues to evolve, with ambitious goals that will shape content creation across the web. Your contributions—whether code, documentation, design, or community building—help ensure this evolution meets the complex needs of enterprise environments while maintaining WordPress's commitment to democratizing publishing.
 
 As you move forward with your contributions, remember that every addition, no matter how small, helps build the future of WordPress. The WordPress community welcomes your expertise and perspective as an enterprise developer, and your contributions will benefit both your professional growth and the broader WordPress ecosystem.
-
-Citations:
-[1] http://raw.githubusercontent.com/jonathanbossenger/enterp
-[2] https://developer.wordpress.org/block-editor/contributors/
-[3] https://docs.wpvip.com/development-workflow/contribute-to-wordpress/
-[4] https://github.com/OxfordRSE/gutenberg
-[5] https://www.gutenberg.org/ebooks/14585.html.images
-[6] https://wpvip.com/case-studies/behind-the-scenes-of-news-uks-rampant-speed-to-value-with-gutenberg/
-[7] https://en.wikipedia.org/wiki/Johannes_Gutenberg
-[8] https://github.com/WordPress/gutenberg/blob/trunk/CONTRIBUTING.md
-[9] https://www.multidots.com/guides/wordpress-contribution-guide/
-[10] https://passionsplay.com/blog/getting-started-with-wordpress-gutenberg-development/
-[11] https://wpmet.com/rebuilding-website-in-gutenberg/
-[12] https://www.bookfusion.com/books/41853-erpanet-case-study-project-gutenberg
-[13] https://papersowl.com/examples/gutenbergs-legacy-the-printing-presss-role-in-shaping-modern-society/
-[14] https://learn.rtcamp.com/courses/contributing-to-wordpress/l/contributing-to-wordpress-2/t/contributing-to-gutenberg/
-[15] https://www.redwall.ee/en/blog/case-study-benefits-of-migrating-wordpress-web-to-gutenberg/
-[16] https://study.com/academy/lesson/johannes-gutenberg-inventions-facts-accomplishments.html
-[17] https://mkaz.blog/wordpress/contribute-developer-documentation-to-gutenberg
-[18] https://developer.wordpress.org/block-editor/contributors/code/getting-started-with-code-contribution/
-[19] https://www.gutenberg.org/help/
-[20] https://neliosoftware.com/blog/how-to-contribute-to-gutenberg-as-a-wordpress-developer/
-[21] https://devrix.com/wordpress-community-contribution/
-[22] https://wordpress.org/plugins/gutenberg/
-[23] https://www.gutenberg.org/help/submitting_your_own_work.html
-[24] https://learn.wordpress.org/workshop/contributing-on-the-wordpress-community-team/
-[25] https://github.com/WordPress/gutenberg
-[26] https://github.com/WordPress/gutenberg/contribute
-[27] https://kinsta.com/blog/wordpress-contributor/
-[28] https://www.reddit.com/r/Wordpress/comments/16p7wd1/is_gutenberg_the_way_to_go/
-[29] https://www.nexcess.net/blog/a-guide-to-getting-started-with-wordpress-gutenberg/
-[30] https://www.thegutenberg.com/our-work/
-[31] http://www.gutenberg.org/ebooks/14585
-[32] https://www.igi-global.com/chapter/institution-case-study/102373
-[33] https://www.britannica.com/biography/Johannes-Gutenberg
-[34] https://pmc.ncbi.nlm.nih.gov/articles/PMC8740453/
-[35] https://webdevstudios.com/2018/08/21/beaver-builder-vs-gutenberg/
-[36] https://www.thecommunityagency.com/case-studies/project-gutenberg
-[37] https://matejlatin.github.io/Gutenberg/example/
-[38] http://www.gutenberg.org/ebooks/subject/25342
-[39] https://templately.com/page/coderlytics-case-study-page-for-gutenberg
-[40] https://scarc.library.oregonstate.edu/omeka/exhibits/show/mcdonald/incunabula/gutenberg/
-[41] https://lemelson.mit.edu/resources/johann-gutenberg
-
----
-Answer from Perplexity: pplx.ai/share
