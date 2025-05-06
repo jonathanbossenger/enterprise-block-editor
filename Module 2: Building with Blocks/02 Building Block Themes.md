@@ -1,16 +1,16 @@
 # Building Block Themes
 
-Block themes represent the future of WordPress site development, leveraging the full capability of blocks and the Block Editor to create highly customizable, flexible websites. 
+Block themes represent the future of WordPress site development, leveraging the full capability of blocks and the Block Editor to create highly customizable, flexible websites.
 
-Unlike traditional themes that rely heavily on PHP templates and custom CSS, block themes use HTML templates, block markup and a configuration file called `theme.json` to define their appearance and functionality. 
+Unlike traditional themes that rely heavily on PHP templates and custom CSS, block themes use HTML templates, block markup and a configuration file called `theme.json` to define their appearance and functionality.
 
-Block themes also enable full site editing, allowing site admins to visually customize every aspect of their site directly through the editor interface. 
+Block themes also enable full site editing, allowing site admins to visually customize every aspect of their site directly through the editor interface.
 
 This lesson explores the essential components of building effective block themes, including developer tooling to get started, configuring theme.json, creating custom templates and patterns, and finally extending functionality through child themes.
 
 ## Create Block Theme
 
-Built and maintained by the various WordPress project contributors, the [Create Block Theme](https://wordpress.org/plugins/create-block-theme/) plugin bridges the gap between visual editing in the Site Editor and generating theme files. 
+Built and maintained by the various WordPress project contributors, the [Create Block Theme](https://wordpress.org/plugins/create-block-theme/) plugin bridges the gap between visual editing in the Site Editor and generating theme files.
 
 This official WordPress.org plugin simplifies block theme creation through database-to-filesystem translation, enabling developers to export editor customizations directly to theme files.
 
@@ -26,9 +26,9 @@ The Create Block Theme plugin offers several key features that streamline the th
 
 ### Creating Your First Blank Block Theme
 
-With the plugin installed, either on a staging or local environment, you can create a blank block theme. 
+With the plugin installed, either on a staging or local environment, you can create a blank block theme.
 
-There are two ways to create a new block theme. 
+There are two ways to create a new block theme.
 
 The first is from the WP Admin menu:
 
@@ -54,7 +54,7 @@ You can learn more about the Create Block Theme plugin and its features in [this
 
 Open the newly created theme in your code editor, and then edit the `theme.json` file in the root of the theme directory.
 
-```json
+```
 {
 	"$schema": "https://schemas.wp.org/wp/6.8/theme.json",
 	"settings": {
@@ -91,15 +91,15 @@ Open the newly created theme in your code editor, and then edit the `theme.json`
 }
 ```
 
-The theme.json file serves multiple essential functions in a block theme. 
+The theme.json file serves multiple essential functions in a block theme.
 
 First, it replaces the proliferation of theme support flags with a standardized approach to configuring the editor. In the past, theme developers had to use various theme support flags to enable or disable features like custom colors, font sizes, and layout options. Now these settings can be enabled or disabled in a single file, making it easier to manage and understand the theme's capabilities.
 
-Second, it provides a structured way to manage CSS, reducing specificity wars and the amount of CSS enqueued. 
+Second, it provides a structured way to manage CSS, reducing specificity wars and the amount of CSS enqueued.
 
 Finally, it enables more granular control over which customization options are available to users on a global or per-block basis.
 
-Notice that the theme.json includes a $schema property. Adding the `$schema` reference provides autocomplete and inline documentation while working on your `theme.json` files. 
+Notice that the theme.json includes a $schema property. Adding the `$schema` reference provides autocomplete and inline documentation while working on your `theme.json` files.
 
 You can use the default schema at `https://schemas.wp.org/trunk/theme.json` or specify a particular WordPress version in the schema URL, such as `https://schemas.wp.org/wp/6.8/theme.json` for version-specific features.
 
@@ -107,7 +107,7 @@ You can use the default schema at `https://schemas.wp.org/trunk/theme.json` or s
 
 By default, WordPress ships with and includes a core `theme.json` file that provides a set of default settings and styles. This file is located in the `wp-includes/theme.json` directory.
 
-```php
+```
 {
 	"$schema": "https://schemas.wp.org/trunk/theme.json",
 	"version": 3,
@@ -524,7 +524,7 @@ Theme.json is organized into two primary sections: settings and styles.
 
 The settings section controls which options are available to be set, either in the styles section or in the Site Editor interface,. You can define global settings that apply to all blocks or specify settings for individual block types:
 
-```json
+```
 {
     "version": 2,
     "settings": {
@@ -577,7 +577,7 @@ This example defines a custom color palette and font sizes globally, but disable
 
 The styles section defines the default visual appearance of blocks in both the editor and front end. These styles can either make use of any predefined values defined in the `settings` section, or custom CSS values:
 
-```json
+```
 {
     "version": 2,
     "styles": {
@@ -600,13 +600,13 @@ The styles section defines the default visual appearance of blocks in both the e
 }
 ```
 
-This example applies the `primary` and `secondary` colours defined in the earlier `settings` section to the global text and background colors, as well as applying the `small` font size as the default global font size for all typography. Additionally, it sets a custom global line height, and specific font weight styling for all heading blocks. 
+This example applies the `primary` and `secondary` colours defined in the earlier `settings` section to the global text and background colors, as well as applying the `small` font size as the default global font size for all typography. Additionally, it sets a custom global line height, and specific font weight styling for all heading blocks.
 
 ### Layout Configuration
 
 One of the most important settings in theme.json is the layout configuration, which defines content width and alignment options:
 
-```json
+```
 {
     "version": 2,
     "settings": {
@@ -628,15 +628,15 @@ Block themes use a combination of templates, template parts, and patterns to cre
 
 Templates are HTML files that define the layout of different content types in your WordPress site. In a block theme, templates are stored in the `templates` directory, and use block markup instead of PHP template tags. At minimum, a block theme requires an `index.html` file.
 
-Templates follow the [WordPress Template Hierarchy](https://developer.wordpress.org/themes/templates/template-hierarchy/) which is what WordPress uses to determine which template to render for any specific piece of data. 
+Templates follow the [WordPress Template Hierarchy](https://developer.wordpress.org/themes/templates/template-hierarchy/) which is what WordPress uses to determine which template to render for any specific piece of data.
 
-One of the benefits of the Site Editor and Create Block Theme, is that it's possible to create new Templates and design them in the Editor, and then use Create Block Theme to save the newly designed template to the theme itself. 
+One of the benefits of the Site Editor and Create Block Theme, is that it's possible to create new Templates and design them in the Editor, and then use Create Block Theme to save the newly designed template to the theme itself.
 
 ### Template Parts
 
 Template parts are reusable components that can be included in multiple templates. Common template parts include headers, footers, and sidebars. In a block theme, template parts are stored in the `parts` folder.
 
-Inside your newly created theme, you'll find a series of parts, including multiple header and footer options, as well as a sidebar template part. 
+Inside your newly created theme, you'll find a series of parts, including multiple header and footer options, as well as a sidebar template part.
 
 ### Patterns
 
@@ -646,7 +646,7 @@ One of the major benefits of block patterns is that they can also include PHP. T
 
 #### Using the Patterns Directory
 
-Patterns are stored in the `/patterns` directory of the theme. WordPress automatically registers these as patterns. If you look in the patterns directory of your theme, you'll see a series of pattern files, everything from banners to FAQ patterns. 
+Patterns are stored in the `/patterns` directory of the theme. WordPress automatically registers these as patterns. If you look in the patterns directory of your theme, you'll see a series of pattern files, everything from banners to FAQ patterns.
 
 ## Child Themes
 
@@ -664,4 +664,4 @@ Building block themes represents a significant shift in WordPress theme developm
 
 Custom templates, template parts, and patterns form the building blocks of modern theme development, allowing for reusable components and efficient workflows. While the need for child themes has diminished somewhat with the advent of the Site Editor, they remain an essential tool for theme developers who need to make deeper customizations while preserving compatibility with parent theme updates.
 
-As block themes continue to evolve, mastering these fundamentals will ensure you can create sophisticated, flexible themes that take full advantage of WordPress's powerful block editor capabilities.
+As block themes continue to evolve, mastering these fundamentals will ensure you can create sophisticated, flexible themes that take full advantage of WordPress's powerful block editor capabilities.  

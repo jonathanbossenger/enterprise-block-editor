@@ -1,4 +1,4 @@
-# 2.3: Block Templates
+# Block Templates
 
 In this lesson, we'll explore the world of WordPress block templates, focusing on their application to custom post types.
 
@@ -10,7 +10,7 @@ Custom post types are a powerful feature of WordPress that allow developers to d
 
 You're probably already familiar with how to create custom post types, but let's do a quick refresher:
 
-```php
+```
 add_action( 'init', 'vip_learn_register_book_post_type' );
 function vip_learn_register_book_post_type(){
 	$book_arguments = array(
@@ -50,7 +50,7 @@ To create this default block template for your custom post type, you set the `te
 
 To understand how to structure a block template array, let's look at an example of some block markup that you might create in the editor:
 
-```html
+```
 <!-- wp:group {"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:columns -->
     <div class="wp-block-columns"><!-- wp:column -->
@@ -73,6 +73,7 @@ To understand how to structure a block template array, let's look at an example 
 ```
 
 Here we have the following structure:
+
 - A group block with a constrained layout
 - Inside the group block, a columns block
 - Inside the columns block, two column blocks
@@ -81,7 +82,7 @@ Here we have the following structure:
 
 To represent this structure in a PHP array, you would structure the array like this:
 
-```php
+```
 array(
     array( 'core/group', array(
         'layout' => array(
@@ -113,7 +114,7 @@ array(
 
 Using this structure, you can create this default editor template for a "Book" custom post type:
 
-```php
+```
 add_action( 'init', 'vip_learn_register_book_post_type' );
 function vip_learn_register_book_post_type(){
 	$book_arguments = array(
@@ -169,7 +170,7 @@ You can also control the flexibility of your template by implementing template l
 
 This feature allows you to restrict the ability to move or remove blocks within the template.
 
-```php
+```
 add_action( 'init', 'vip_learn_register_book_post_type' );
 function vip_learn_register_book_post_type(){
 	$book_arguments = array(
@@ -229,7 +230,7 @@ While we've seen how to apply templates during custom post type registration, th
 
 To apply a template to an existing post type, you can use the `register_post_type_args` filter:
 
-```php
+```
 add_filter( 'register_post_type_args', 'vip_learn_add_template_to_post', 20, 2 );
 
 function vip_learn_add_template_to_post( $args, $post_type ) {
@@ -252,7 +253,7 @@ This function adds a template to the default 'post' post type, consisting of an 
 
 You can also apply templates conditionally based on various factors. For example, you might want to apply a different template based on a post's category:
 
-```php
+```
 add_filter( 'default_block_template', 'vip_learn_conditional_template', 10, 3 );
 
 function vip_learn_conditional_template( $block_template, $post_type, $post ) {
@@ -289,12 +290,13 @@ However, it is also possible to register a template that will be used to render 
 To define this block template you can use the `register_block_template` function. This function works similarly to `register_block_pattern`, but it is specifically designed for custom post type templates.
 
 `register_block_template` accepts the following parameters:
+
 - A template name in the form of `plugin_uri//template_name`
 - An array of arguments to set optional template properties like the title, description, content, and the post types it applies to.
 
 Here's an example of how you might register a block template for a custom post type:
 
-```php
+```
 register_block_template( 'vip_learn_block_templates//book',
 	array(
 		'title'       => __( 'Single Book', 'vip-learn-block-templates' ),
@@ -336,11 +338,12 @@ In this example, you're registering a block template for the `book` custom post 
 
 Just as you did with Patterns, you can create a custom function to load the template content from a file in a `templates` directory, and then call that function to get the template conte for the `content` argument of `register_block_template`.
 
-```php
+```
 /**
  * Fetch and include the template content
  */
 function vip_learn_get_template_content( $template ) {
+$template = basename($template); // Protects against directory traversal
 	ob_start();
 	include __DIR__ . "/templates/{$template}";
 	return ob_get_clean();
@@ -358,4 +361,4 @@ register_block_template( 'vip_learn_block_templates//book',
 
 ## Summary
 
-Being able to define block templates for custom post types is a powerful feature that allows you to create structured content layouts for your WordPress site. By defining block templates, you can ensure that your content is consistently formatted and styled, providing a better user experience for site builders and visitors.
+Being able to define block templates for custom post types is a powerful feature that allows you to create structured content layouts for your WordPress site. By defining block templates, you can ensure that your content is consistently formatted and styled, providing a better user experience for site builders and visitors.  

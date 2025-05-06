@@ -1,4 +1,4 @@
-# 2.2: Block Patterns
+# Block Patterns
 
 ## Understanding Block Patterns
 
@@ -26,12 +26,13 @@ To design a custom pattern, you can use the WordPress block editor to create the
 1. Create a new post or page in the WordPress admin.
 
 2. Add the necessary blocks to create your pattern. For our "Featured Product" example, you might use:
-    - A Group block to contain everything
-    - A Columns block with two columns
-    - An Image block in the left column
-    - Heading, Paragraph, and Button blocks in the right column
 
-![Creating the pattern in the editor](images/patterns/featured-product-pattern.png)
+   - A Group block to contain everything
+   - A Columns block with two columns
+   - An Image block in the left column
+   - Heading, Paragraph, and Button blocks in the right column
+
+Creating the pattern in the editor
 
 3. Style the blocks as desired using the block settings and any custom CSS classes.
 
@@ -39,7 +40,7 @@ To design a custom pattern, you can use the WordPress block editor to create the
 
 Below is an example of what the block markup for this pattern might look like.
 
-```html
+```
 <!-- wp:group {"layout":{"type":"constrained"}} -->
 <div class="wp-block-group"><!-- wp:columns {"style":{"spacing":{"padding":{"top":"var:preset|spacing|20","bottom":"var:preset|spacing|20","left":"var:preset|spacing|20","right":"var:preset|spacing|20"}}},"borderColor":"accent-4"} -->
    <div class="wp-block-columns has-border-color has-accent-4-border-color" style="padding-top:var(--wp--preset--spacing--20);padding-right:var(--wp--preset--spacing--20);padding-bottom:var(--wp--preset--spacing--20);padding-left:var(--wp--preset--spacing--20)"><!-- wp:column -->
@@ -79,7 +80,7 @@ This can be done in either a theme or child theme's `functions.php` file or in a
 
 Here's an example of how to register the "Featured Product" pattern we designed:
 
-```php
+```
 add_action( 'init', 'vip_learn_register_custom_pattern' );
 
 function vip_learn_register_custom_pattern() {
@@ -127,10 +128,10 @@ The `register_block_pattern()` function takes two arguments:
 
 1. A unique identifier for the pattern (namespaced with your theme or plugin name)
 2. An array of pattern properties, including:
-    - `title`: The name of the pattern as it appears in the editor
-    - `description`: A brief explanation of the pattern's purpose
-    - `content`: The HTML structure of the pattern (copied from the Code Editor)
-    - `categories`: An array of category names where the pattern should appear
+   - `title`: The name of the pattern as it appears in the editor
+   - `description`: A brief explanation of the pattern's purpose
+   - `content`: The HTML structure of the pattern (copied from the Code Editor)
+   - `categories`: An array of category names where the pattern should appear
 
 Now, when the user selects Patterns from the Block Inserter, the "Featured" Product pattern will be available in the "Featured" category.
 
@@ -142,11 +143,12 @@ To start, create a `patterns` directory in your theme or plugin folder and save 
 
 Next, create a custom function to load the pattern content from the file:
 
-```php
+```
 /**
  * Fetch and include the pattern content
  */
 function vip_learn_get_pattern_content( $pattern ) {
+	$pattern = basename($pattern); // Protects against directory traversal
 	ob_start();
 	include __DIR__ . "/patterns/{$pattern}";
 	return ob_get_clean();
@@ -155,7 +157,7 @@ function vip_learn_get_pattern_content( $pattern ) {
 
 Finally, update the `content` property in the `register_block_pattern()` function to call the custom function, passing the file name of the pattern file to be included:
 
-```php
+```
 'content' => vip_learn_get_pattern_content( 'featured-product.php' ),
 ```
 
@@ -171,7 +173,7 @@ The function takes two arguments: the category slug and an array of category pro
 
 Here's an example of registering the new "VIP Featured" category for our "Featured Product" pattern:
 
-```php
+```
 add_action( 'init', 'vip_learn_register_custom_pattern' );
 
 function vip_learn_register_custom_pattern() {
@@ -264,4 +266,4 @@ For e-commerce or SaaS sites, create patterns to showcase product features consi
 - A "Feature Comparison" pattern with a table layout
 - An "Image Feature" pattern with an image, heading, and description on alternating sides
 
-By leveraging block patterns effectively, you can create a library of reusable content structures that enhance consistency, speed up development, and improve the overall user experience of your WordPress site.
+By leveraging block patterns effectively, you can create a library of reusable content structures that enhance consistency, speed up development, and improve the overall user experience of your WordPress site.  
