@@ -20,6 +20,8 @@ Once there, you can initiate the block creation process by running:
 npx @wordpress/create-block@latest my-custom-block
 ```
 
+[Tip] If you're asked to install the `@wordpress/create-block` package, you can enter y to proceed. [/Tip]
+
 This command generates a new plugin directory named `my-custom-block` containing a fully functional block plugin. The process includes setting up the essential PHP, JavaScript, and CSS files for the new block and configuring the build process using `@wordpress/scripts`.
 
 The `@wordpress/create-block` package also provides a range of options to customize the block scaffold. 
@@ -39,14 +41,15 @@ A well-organized directory structure is essential for maintainability and scalab
 ```
 my-custom-block/
 ├── build/
+│   ├── blocks-manifest.php
 │   └── my-custom-block/
 │       ├── block.json
-│       ├── index-rtl.css
 │       ├── index.asset.php
 │       ├── index.css
 │       ├── index.js
-│       ├── style-index-rtl.css
+│       ├── index-rtl.css
 │       ├── style-index.css
+│       ├── style-index-rtl.css
 │       ├── view.asset.php
 │       └── view.js
 ├── node_modules/
@@ -61,7 +64,6 @@ my-custom-block/
 │       └── view.js
 ├── .editorconfig
 ├── .gitignore
-├── folder-structure.md
 ├── my-custom-block.php
 ├── package.json
 ├── package-lock.json
@@ -74,7 +76,9 @@ The `build` directory contains the compiled and optimized assets that WordPress 
 
 The `node_modules/` directory contains all npm dependencies used during development. It should not be committed to version control.
 
-The `src` directory contains all the source files for your block, where you'll do most of your development work. Let’s zoom in to focus on the files on that directory.
+The `src` directory contains all the source files for your block, where you'll do most of your development work. 
+
+Let’s zoom in to focus on the files in that directory.
 
 ```
 ├── src/
@@ -119,6 +123,7 @@ The rest of the files are the source code for the block:
 - `index.js`: The main entry point for your block's JavaScript.
 - `save.js`: Determines how the block is saved and rendered on the frontend.
 - `style.scss`: Styles for the block on the frontend.
+- `view.js`: Handles any custom JavaScript you might require on the frontend.
 
 You will notice that create-block scaffolds the block's source code inside a sub-directory inside the `src` directory, in this case, `my-custom-block`. This allows you to build multiple blocks in the same plugin. The compiled files in the `build` directory match this directory structure.
 
@@ -143,20 +148,50 @@ Zooming back out into the root of the plugin, the main PHP file, `my-custom-bloc
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
-
 /**
- * Registers the block using the metadata loaded from the `block.json` file.
- * Behind the scenes, it registers also all assets so they can be enqueued
+ * Registers the block using a `blocks-manifest.php` file, which improves the performance of block type registration.
+ * Behind the scenes, it also registers all assets so they can be enqueued
  * through the block editor in the corresponding context.
  *
- * @see https://developer.wordpress.org/reference/functions/register_block_type/
+ * @see https://make.wordpress.org/core/2025/03/13/more-efficient-block-type-registration-in-6-8/
+ * @see https://make.wordpress.org/core/2024/10/17/new-block-type-registration-apis-to-improve-performance-in-wordpress-6-7/
  */
 function create_block_my_custom_block_block_init() {
-	register_block_type( __DIR__ . '/build/my-custom-block' );
+	/**
+	 * Registers the block(s) metadata from the `blocks-manifest.php` and registers the block type(s)
+	 * based on the registered block metadata.
+	 * Added in WordPress 6.8 to simplify the block metadata registration process added in WordPress 6.7.
+	 *
+	 * @see https://make.wordpress.org/core/2025/03/13/more-efficient-block-type-registration-in-6-8/
+	 */
+	if ( function_exists( 'wp_register_block_types_from_metadata_collection' ) ) {
+		wp_register_block_types_from_metadata_collection( __DIR__ . '/build', __DIR__ . '/build/blocks-manifest.php' );
+		return;
+	}
+
+	/**
+	 * Registers the block(s) metadata from the `blocks-manifest.php` file.
+	 * Added to WordPress 6.7 to improve the performance of block type registration.
+	 *
+	 * @see https://make.wordpress.org/core/2024/10/17/new-block-type-registration-apis-to-improve-performance-in-wordpress-6-7/
+	 */
+	if ( function_exists( 'wp_register_block_metadata_collection' ) ) {
+		wp_register_block_metadata_collection( __DIR__ . '/build', __DIR__ . '/build/blocks-manifest.php' );
+	}
+	/**
+	 * Registers the block type(s) in the `blocks-manifest.php` file.
+	 *
+	 * @see https://developer.wordpress.org/reference/functions/register_block_type/
+	 */
+	$manifest_data = require __DIR__ . '/build/blocks-manifest.php';
+	foreach ( array_keys( $manifest_data ) as $block_type ) {
+		register_block_type( __DIR__ . "/build/{$block_type}" );
+	}
 }
 add_action( 'init', 'create_block_my_custom_block_block_init' );
-
 ```
+
+The `create_block_my_custom_block_block_init` function registers the block's and makes use of two new functions introduced in WordPress 6.7 and 6.8 to improve the performance of block type registration. It also includes fallbacks for older versions of WordPress.
 
 The rest of the files scaffolded are not specific to developing blocks but allow for additional developer-related functionality:
 
