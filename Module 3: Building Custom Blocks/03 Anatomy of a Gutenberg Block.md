@@ -6,7 +6,7 @@ Before diving into the process of building custom blocks, it's important to unde
 
 Block registration involves defining the block's metadata, settings, and behavior and requires two parts:
 
-- Registering the block’s code with WordPress using the relevant PHP functions
+- Registering the block’s code with WordPress using the relevant PHP function(s)
 - Registering the block in the editor with the JavaScript `registerBlockType` function.
 
 ## PHP block registration
@@ -17,7 +17,7 @@ There are a few ways available to register blocks, which has changed in recent v
 
 The original way recommended to register blocks was to use the `register_block_type` function, and pass it the path to the block's directory as an argument. 
 
-```
+```php
 add_action( 'init', 'create_block_my_custom_block_block_init' );
 function create_block_my_custom_block_block_init() {
 	register_block_type( __DIR__ . '/build/my-custom-block' );
@@ -28,7 +28,7 @@ If you are using a version of WordPress older than 6.7, you will need to use thi
 
 This would parse the block's `block.json` file to register the block metadata and then register the block itself.
 
-This file contained all the necessary information about the block, including its name, title, description, attributes, and the paths to the scripts and styles that make up its functionality and styling.
+The `block.json` file contains all the necessary information about the block, including its name, title, description, attributes, and the paths to the scripts and styles that make up its functionality and styling.
 
 ```
 {
@@ -73,7 +73,7 @@ You’ll notice that the `editorScript` is pointing to the `index.js` file in th
 
 ### register_block_type_from_metadata and the blocks-manifest.php file
 
-In WordPress 6.7 the `register_block_type_from_metadata` was added, to improve the performance of block type registration, which uses a new `blocks-manifest.php` file. This file is generated during the build process and contains all the metadata from the `block.json` files for all blocks in the plugin, in a PHP array.
+In WordPress 6.7 the `register_block_type_from_metadata` was added, to improve the performance of block type registration, which uses a new `blocks-manifest.php` file. The `blocks-manifest.php` file is generated during the build process and contains all the metadata from the `block.json` files for all blocks in the plugin, combined in a single PHP array.
 
 ```php
 <?php
@@ -105,7 +105,7 @@ return array(
 
 The changes to the block registration process were part of a larger effort in WordPress 6.7 to improve the performance and usability of block development in WordPress. 
 
-In the previous method, the metadata was loaded into memory by parsing the `block.json` file, which was inefficient, especially for large projects with many blocks. Using `register_block_type_from_metadata` which includes the `blocks-manifest.php` PHP file makes it faster to load the block metadata into memory.
+In the previous method, the metadata was loaded into memory by parsing the `block.json` file, which was inefficient, especially for large projects with many blocks. Using `register_block_type_from_metadata` which simply includes the `blocks-manifest.php` PHP file speeds up the process of loading the block metadata into memory.
 
 `register_block_type_from_metadata` accepts two arguments, the path to the plugins build directory and the path to the `blocks-manifest.php` file, but it is used to register a single block type. Therefore, if you have multiple blocks, you need to loop through the array of block types in the `blocks-manifest.php` file and register each block type using `register_block_type`.
 
@@ -121,7 +121,7 @@ function create_block_my_custom_block_block_init() {
 }
 ````
 
-If the WordPress version of the site is 6.7, you have to use this method.
+If the WordPress version of the site is 6.7, you should use this method.
 
 ### wp_register_block_metadata_collection
 
@@ -143,9 +143,11 @@ If the WordPress version of the site is 6.8 or newer, you only need to use this 
 
 In order to support older versions of WordPress, the `create-block` package was updated to scaffold blocks using both methods, with WordPress version checks in place to only use specific functionality in the right context.
 
-## registerBlockType
+## JavaScript block registration
 
-In the `index.js` file in the `src` directory, you use the `registerBlockType` function from the `@wordpress/blocks` package to register all the features and functionality of the block when the editor loads. At a minimum, `registerBlockType` needs two things:
+Once the blocks metadata and source code is registered with WordPress, the next step is to register the block in the editor using JavaScript. This is done using the `registerBlockType` function from the `@wordpress/blocks` package.
+
+`registerBlockType` is typically called in the main script for your block, usually `index.js`. At a minimum, `registerBlockType` needs two things:
 
 * The block name
 * A JavaScript object containing properties for the edit and save functionality of the block
